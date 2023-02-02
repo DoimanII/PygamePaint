@@ -3,19 +3,20 @@ from settings import *
 import sys
 
 
-layer_size = (500, 300)
+layer_size = (700, 500)
+layer_pos = (90, 50)
 layer = pg.Surface(layer_size)
 layer_color = 'white'
 layer.fill(layer_color)
 
-pencil_color = 'black'
+pencil_color_one = 'black'
+pencil_color_two = layer_color
 pencil_size = 4
-
 
 pg.init()
 pg.display.set_caption('THE BEST PAINT!')
 keys = {'LeftMouseBottom': False, 'RightMouseBottom': False}
-def rect(mpos, size):
+def DrawRect(mpos, size):
     data = []
     for x in range(size):
         for y in range(size):
@@ -25,17 +26,35 @@ def rect(mpos, size):
     return data
 
 while True:
-    mouse_pos = (pg.mouse.get_pos()[0] - 50, pg.mouse.get_pos()[1] - 50)
+    mouse_pos = (pg.mouse.get_pos()[0] - layer_pos[0], pg.mouse.get_pos()[1] - layer_pos[1])
     if layer.get_rect().collidepoint(mouse_pos):
-        #print(rect(mouse_pos, 4))
         if keys['LeftMouseBottom']:
-            for pixel in rect(mouse_pos, pencil_size):
-                layer.set_at(pixel, pencil_color)
+            for pixel in DrawRect(mouse_pos, pencil_size):
+                layer.set_at(pixel, pencil_color_one)
         if keys['RightMouseBottom']:
-            for pixel in rect(mouse_pos, pencil_size):
-                layer.set_at(pixel, layer_color)
+            for pixel in DrawRect(mouse_pos, pencil_size):
+                layer.set_at(pixel, pencil_color_two)
+
+    if pallet_rect.collidepoint(pg.mouse.get_pos()):
+        for color in pallet_colors:
+            rect = color[0].get_rect(topleft=color[1])
+            if rect.collidepoint(pg.mouse.get_pos()):
+                offset = (pg.mouse.get_pos()[0] - rect.left, pg.mouse.get_pos()[1] - rect.top)
+                color = color[0].get_at(offset)
+                if keys['LeftMouseBottom']:
+                    pencil_color_one = color
+                elif keys['RightMouseBottom']:
+                    pencil_color_two = color
+
+
+
+
     display.fill((210, 222, 225))
-    display.blit(layer, (50, 50))
+
+    display.blit(pallet, pallet_rect)
+    for color in pallet_colors:
+        display.blit(color[0], color[1])
+    display.blit(layer, layer_pos)
 
     surf = pg.transform.scale(display, WIN_SIZE)
     screen.blit(surf, (0, 0))
